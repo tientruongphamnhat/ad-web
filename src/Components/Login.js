@@ -76,7 +76,7 @@ class Login extends Component {
   }
 
   render() {
-    const user = localStorage.getItem('userToken');
+    const user = localStorage.getItem('userTokenAdmin');
     return (
       <>
         {!user ? (

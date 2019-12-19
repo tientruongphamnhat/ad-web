@@ -1,14 +1,16 @@
 import React from 'react';
 import { Switch, Route, Redirect } from 'react-router-dom';
 import Login from '../Containers/Login';
+import ViewListUser from './ViewListUser';
+import Menu from './NavBar';
 
 class PVRoute extends React.Component {
   PrivateRoute = ({ children }) => {
-    const { user } = this.props;
+    const { user } = localStorage.getItem('userAdmin');
     return (
       <Route
         render={({ location }) =>
-          Object.keys(user).length > 1 ? (
+          user ? (
             children
           ) : (
             <Redirect
@@ -25,12 +27,21 @@ class PVRoute extends React.Component {
 
   render() {
     return (
-      <Switch>
-        <Route exact path="/">
-          <Login />
-        </Route>
-        <Redirect from="*" to="/" />
-      </Switch>
+      <>
+        <Menu />
+        <Switch>
+          <Route exact path="/">
+            <Login />
+          </Route>
+          {/* <this.PrivateRoute path="/listUser">
+          <ViewListUser />
+        </this.PrivateRoute> */}
+          <Route path="/listUser">
+            <ViewListUser />
+          </Route>
+          <Redirect from="*" to="/" />
+        </Switch>
+      </>
     );
   }
 }
