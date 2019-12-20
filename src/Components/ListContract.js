@@ -1,9 +1,8 @@
 import React from 'react';
-import { Card, Media, Table, Button, Form, Input } from 'reactstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
+import { Badge, Card, Media, Table, Button, Form, Input } from 'reactstrap';
 import '../Style.css';
 
-class ListUser extends React.Component {
+class ListContract extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
@@ -19,7 +18,7 @@ class ListUser extends React.Component {
         <div className="container">
           <div class="container instructors-info ml-5">
             <header class="entry-heading">
-              <h2 class="entry-title">Quản lý người dùng</h2>
+              <h2 class="entry-title">Danh sách hợp đồng</h2>
             </header>
             <div className="search">
               <Form inline>
@@ -27,7 +26,7 @@ class ListUser extends React.Component {
                   <Input
                     className="col-sm-4"
                     type="search"
-                    placeholder="Tên Người dùng?"
+                    placeholder="Tên người gia sư hoặc người học?"
                   ></Input>
                 </>
                 <>
@@ -45,11 +44,11 @@ class ListUser extends React.Component {
               <Table className="align-items-center table-flush" responsive>
                 <thead className="thead-light">
                   <tr>
-                    <th scope="col">Người dùng</th>
-                    <th scope="col">Email</th>
-                    <th scope="col">Giới tính</th>
-                    <th scope="col">Số điện thoại</th>
-                    <th scope="col">Nơi ở</th>
+                    <th scope="col">Học sinh</th>
+                    <th scope="col">Phí</th>
+                    <th scope="col">Xác nhận</th>
+                    <th scope="col">Trạng thái</th>
+                    <th scope="col">Thanh toán</th>
                     <th scope="col" />
                   </tr>
                 </thead>
@@ -69,20 +68,29 @@ class ListUser extends React.Component {
                         </a>
                         <Media>
                           <span className="mb-0 text-sm">
-                            Trương Phạm Nhật Tiến
+                            Trương Phạm Nhât Tiến
                           </span>
                         </Media>
                       </Media>
                     </th>
-                    <td>nhattien@gmail.com</td>
-                    <td>Nam</td>
-                    <td>097653524</td>
-                    <td>Hồ Chí Minh</td>
+                    <td>160000d</td>
+                    <td>
+                      <Badge pill color="success">
+                        Đã xác nhận
+                      </Badge>
+                    </td>
+                    <td>
+                      <Badge pill color="primary">
+                        Đang học
+                      </Badge>
+                    </td>
+                    <td>
+                      <Badge pill color="danger">
+                        Chưa thanh toán
+                      </Badge>
+                    </td>
                     <td className="text-right">
-                      <Button
-                        style={{ backgroundColor: '#34d986', border: 'none' }}
-                        className="detail-button"
-                      >
+                      <Button color="info" className="detail-button">
                         Chi tiết
                       </Button>
                     </td>
@@ -107,15 +115,24 @@ class ListUser extends React.Component {
                         </Media>
                       </Media>
                     </th>
-                    <td>nhattien@gmail.com</td>
-                    <td>Nam</td>
-                    <td>097653524</td>
-                    <td>Hồ Chí Minh</td>
+                    <td>120000d</td>
+                    <td>
+                      <Badge pill color="warning">
+                        Đang chờ
+                      </Badge>
+                    </td>
+                    <td>
+                      <Badge pill color="danger">
+                        Đang khiếu nại
+                      </Badge>
+                    </td>
+                    <td>
+                      <Badge pill color="danger">
+                        Chưa thanh toán
+                      </Badge>
+                    </td>
                     <td className="text-right">
-                      <Button
-                        style={{ backgroundColor: '#34d986', border: 'none' }}
-                        className="detail-button"
-                      >
+                      <Button color="info" className="detail-button">
                         Chi tiết
                       </Button>
                     </td>
@@ -130,4 +147,4 @@ class ListUser extends React.Component {
   }
 }
 
-export default ListUser;
+export default ListContract;

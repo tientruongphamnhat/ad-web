@@ -3,10 +3,16 @@ import { Switch, Route, Redirect } from 'react-router-dom';
 import Login from '../Containers/Login';
 import ViewListUser from './ViewListUser';
 import Menu from './NavBar';
+import DetailUsser from './DetailUser';
+import Footer from './Footer';
+import DetailContract from './DetailContract';
+import Contract from './ListContract';
+import Complain from './Complain';
+import ControlSkill from './ControlSkills';
 
 class PVRoute extends React.Component {
   PrivateRoute = ({ children }) => {
-    const { user } = localStorage.getItem('userAdmin');
+    const { user } = localStorage.getItem('userAdminToken');
     return (
       <Route
         render={({ location }) =>
@@ -33,14 +39,41 @@ class PVRoute extends React.Component {
           <Route exact path="/">
             <Login />
           </Route>
-          {/* <this.PrivateRoute path="/listUser">
+          {/* <this.PrivateRoute path="/viewUser">
           <ViewListUser />
         </this.PrivateRoute> */}
-          <Route path="/listUser">
+          {/* <this.PrivateRoute path="/detailUser">
+          <DetailUsser/>
+        </this.PrivateRoute> */}
+          {/* <this.PrivateRoute path="/detailContract">
+          <DetailContract/>
+        </this.PrivateRoute> */}
+          {/* <this.PrivateRoute path="/contract">
+          <Contract/>
+        </this.PrivateRoute> */}
+          {/* <this.PrivateRoute path="/controlSkills">
+          <ControlSkill/>
+        </this.PrivateRoute> */}
+          <Route path="/viewUser">
             <ViewListUser />
           </Route>
-          <Redirect from="*" to="/" />
+          <Route path="/detailUser">
+            <DetailUsser />
+          </Route>
+          <Route path="/detailContract">
+            <DetailContract />
+          </Route>
+          <Route path="/contract">
+            <Contract />
+          </Route>
+          <Route path="/complain">
+            <Complain />
+          </Route>
+          <Route path="/controlSkills">
+            <ControlSkill />
+          </Route>
         </Switch>
+        <Footer />
       </>
     );
   }

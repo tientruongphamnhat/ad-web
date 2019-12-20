@@ -66,7 +66,7 @@ class Login extends Component {
   renderAlert() {
     const { kindAlert, message } = this.state;
     const { user } = this.props;
-    if (localStorage.getItem('userToken')) {
+    if (localStorage.getItem('userAdminToken')) {
       return <AlertForm kindAlert="success" message="Đăng nhập thành công." />;
     }
     if (Object.keys(user).length === 1) {
