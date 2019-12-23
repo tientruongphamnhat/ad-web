@@ -2,18 +2,107 @@ import React from 'react';
 import { Card, Media, Table, Button, Form, Input } from 'reactstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../Style.css';
+import { createBrowserHistory } from 'history';
+
+const history = createBrowserHistory();
 
 class ListUser extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      showPopup: false
+      listUser: []
     };
   }
 
-  componentDidMount() {}
+  componentDidMount() {
+    let res = true;
+
+    fetch('https://stormy-ridge-33799.herokuapp.com/users', {
+      method: 'get',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        if (response.status !== 200) {
+          res = false;
+        }
+        return response.json();
+      })
+      .then(response => {
+        if (res) {
+          this.setState({
+            listUser: response.data
+          });
+        }
+        res = true;
+      });
+  }
+
+  handleClickDetailRequest(e) {
+    const idUser = e.target.id;
+    history.push('/detailUser/id:' + idUser);
+    window.location.reload();
+  }
 
   render() {
+    const { listUser } = this.state;
+    const mapListUser = listUser.map(user => {
+      return (
+        <tr>
+          <th scope="row">
+            <Media className="align-items-center">
+              <a
+                className="avatar rounded-circle mr-3"
+                href="#pablo"
+                onClick={e => e.preventDefault()}
+              >
+                <img
+                  alt="avatar"
+                  src={
+                    user.attributes.image
+                      ? `https://stormy-ridge-33799.herokuapp.com${user.attributes.image}`
+                      : 'http://ssl.gstatic.com/accounts/ui/avatar_2x.png'
+                  }
+                />
+              </a>
+              <Media>
+                <span className="mb-0 text-sm">
+                  {user.attributes.name
+                    ? user.attributes.name
+                    : 'Chưa cập nhập tên'}
+                </span>
+              </Media>
+            </Media>
+          </th>
+          <td>{user.attributes.email}</td>
+          <td>
+            {user.attributes.gender
+              ? user.attributes.gender
+              : 'Chưa cập nhập giới tính'}
+          </td>
+          <td>
+            {user.attributes.phone
+              ? user.attributes.phone
+              : 'Chưa cập số điện thoại'}
+          </td>
+          <td>
+            {user.attributes.city ? user.attributes.city : 'Chưa cập địa chỉ'}
+          </td>
+          <td className="text-right">
+            <Button
+              id={user.id}
+              style={{ backgroundColor: '#34d986', border: 'none' }}
+              className="detail-button"
+              onClick={e => this.handleClickDetailRequest(e)}
+            >
+              Chi tiết
+            </Button>
+          </td>
+        </tr>
+      );
+    });
     return (
       <div>
         <div className="container">
@@ -53,74 +142,7 @@ class ListUser extends React.Component {
                     <th scope="col" />
                   </tr>
                 </thead>
-                <tbody>
-                  <tr>
-                    <th scope="row">
-                      <Media className="align-items-center">
-                        <a
-                          className="avatar rounded-circle mr-3"
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          <img
-                            alt="avatar"
-                            src="https://scontent-hkg3-2.xx.fbcdn.net/v/t1.0-1/c0.0.160.160a/p160x160/77054448_2395267320735838_6975058001447092224_o.jpg?_nc_cat=111&_nc_ohc=ymh_DbtN4OoAQmQK7N6pWofiE0KgtgJ3iOOEZ5hBZajEgbBC7vDvB4IOA&_nc_ht=scontent-hkg3-2.xx&oh=58c179d6691c367bf118decdea6e5a29&oe=5EAF7B12"
-                          />
-                        </a>
-                        <Media>
-                          <span className="mb-0 text-sm">
-                            Trương Phạm Nhật Tiến
-                          </span>
-                        </Media>
-                      </Media>
-                    </th>
-                    <td>nhattien@gmail.com</td>
-                    <td>Nam</td>
-                    <td>097653524</td>
-                    <td>Hồ Chí Minh</td>
-                    <td className="text-right">
-                      <Button
-                        style={{ backgroundColor: '#34d986', border: 'none' }}
-                        className="detail-button"
-                      >
-                        Chi tiết
-                      </Button>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th scope="row">
-                      <Media className="align-items-center">
-                        <a
-                          className="avatar rounded-circle mr-3"
-                          href="#pablo"
-                          onClick={e => e.preventDefault()}
-                        >
-                          <img
-                            alt="avatar"
-                            src="https://scontent-hkg3-2.xx.fbcdn.net/v/t1.0-1/c0.0.160.160a/p160x160/77054448_2395267320735838_6975058001447092224_o.jpg?_nc_cat=111&_nc_ohc=ymh_DbtN4OoAQmQK7N6pWofiE0KgtgJ3iOOEZ5hBZajEgbBC7vDvB4IOA&_nc_ht=scontent-hkg3-2.xx&oh=58c179d6691c367bf118decdea6e5a29&oe=5EAF7B12"
-                          />
-                        </a>
-                        <Media>
-                          <span className="mb-0 text-sm">
-                            Trương Phạm Nhật Tiến
-                          </span>
-                        </Media>
-                      </Media>
-                    </th>
-                    <td>nhattien@gmail.com</td>
-                    <td>Nam</td>
-                    <td>097653524</td>
-                    <td>Hồ Chí Minh</td>
-                    <td className="text-right">
-                      <Button
-                        style={{ backgroundColor: '#34d986', border: 'none' }}
-                        className="detail-button"
-                      >
-                        Chi tiết
-                      </Button>
-                    </td>
-                  </tr>
-                </tbody>
+                <tbody>{mapListUser}</tbody>
               </Table>
             </Card>
           </div>

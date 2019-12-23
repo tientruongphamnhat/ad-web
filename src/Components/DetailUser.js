@@ -20,37 +20,72 @@ class user extends Component {
     super(props);
     this.state = {
       user: {
-        id: '1',
-        type: 'user',
+        id: '',
+        type: '',
         attributes: {
-          name: 'Ho Quan Dai',
-          email: 'hoquandai@example.com',
-          dob: '1998-08-08T00:00:00.000Z',
-          gender: 'male',
-          phone: '033444987',
-          city: 'HCM',
-          price: 25000,
-          skills: [
-            {
-              id: 1,
-              name: 'Math',
-              desc: 'Math skills',
-              created_at: '2019-12-09T16:37:27.385Z',
-              updated_at: '2019-12-09T16:37:27.385Z',
-              user_id: 1
-            },
-            {
-              id: 2,
-              name: 'Physic',
-              desc: 'Physic skills',
-              created_at: '2019-12-09T16:37:27.391Z',
-              updated_at: '2019-12-09T16:37:27.391Z',
-              user_id: 2
-            }
-          ]
-        }
+          name: '',
+          email: '',
+          dob: '',
+          gender: '',
+          phone: '',
+          city: '',
+          price: '',
+          skills: []
+        },
+        listSkill: []
       }
     };
+  }
+
+  componentDidMount() {
+    const userID = window.location.pathname.split('id:')[1];
+    // const token = JSON.parse(localStorage.getItem('userToken')).token;
+
+    let res = true;
+
+    fetch('https://stormy-ridge-33799.herokuapp.com/users/' + userID, {
+      method: 'get',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        if (response.status !== 200) {
+          res = false;
+        }
+        return response.json();
+      })
+      .then(response => {
+        if (res) {
+          this.setState({
+            user: response.data
+          });
+        }
+        res = true;
+      });
+
+    fetch('https://stormy-ridge-33799.herokuapp.com/skills', {
+      method: 'get',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        if (response.status !== 200) {
+          res = false;
+        }
+        return response.json();
+      })
+      .then(response => {
+        if (res) {
+          this.setState({
+            listSkill: response.data
+          });
+        }
+        res = true;
+      });
   }
 
   render() {

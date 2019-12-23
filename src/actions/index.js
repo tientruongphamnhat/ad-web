@@ -31,7 +31,7 @@ export const getUser = response => {
       })
       .then(response => {
         if (res) {
-          localStorage.setItem('user', JSON.stringify(response.data));
+          localStorage.setItem('userAdmin', JSON.stringify(response.data));
           dispatch(receiveUser(response.data));
         } else {
           dispatch(loginFailed(response.message));
@@ -74,69 +74,6 @@ export const callAPILogin = (email, password) => {
           dispatch(getUser(response));
         } else {
           dispatch(loginFailed(response.message));
-          // window.location.href = '/login';
-        }
-      });
-  };
-};
-
-export const changeName = (email, name) => {
-  let res = true;
-  return dispatch => {
-    fetch('https://btcn6.herokuapp.com/users/changeName', {
-      method: 'post',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-
-      body: JSON.stringify({
-        email,
-        name
-      })
-    })
-      .then(response => {
-        if (response.status !== 200) {
-          res = false;
-        }
-        return response.json();
-      })
-      .then(response => {
-        if (res) {
-          dispatch(getUser(response));
-        } else {
-          dispatch(loginFailed(response.message));
-        }
-      });
-  };
-};
-
-export const changePassword = (email, password) => {
-  let res = true;
-  return dispatch => {
-    fetch('https://btcn6.herokuapp.com/users/changePassword', {
-      method: 'post',
-      headers: {
-        Accept: 'application/json',
-        'Content-Type': 'application/json'
-      },
-
-      body: JSON.stringify({
-        email,
-        password
-      })
-    })
-      .then(response => {
-        if (response.status !== 200) {
-          res = false;
-        }
-        return response.json();
-      })
-      .then(response => {
-        if (res) {
-          dispatch(getUser(response));
-        } else {
-          dispatch(loginFailed(response.message));
         }
       });
   };
@@ -175,6 +112,34 @@ export const getDetailTutor = idTutor => {
       .then(response => {
         if (res) {
           dispatch(receiveDetailTutor(response.data));
+        }
+      });
+  };
+};
+
+export const updateContract = (token, idContract, contract) => {
+  let res = true;
+  return dispatch => {
+    fetch('https://stormy-ridge-33799.herokuapp.com/contracts/' + idContract, {
+      method: 'put',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      },
+
+      body: JSON.stringify({
+        token,
+        contract
+      })
+    })
+      .then(response => {
+        if (response.status !== 200) {
+          res = false;
+        }
+        return response.json();
+      })
+      .then(response => {
+        if (res) {
         }
       });
   };

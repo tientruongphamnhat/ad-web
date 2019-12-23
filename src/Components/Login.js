@@ -7,7 +7,7 @@ import {
   GoogleLoginButton
 } from 'react-social-login-buttons';
 // import fire from '../../config/firebase';
-import { Link } from 'react-router-dom';
+import { Link, Redirect } from 'react-router-dom';
 
 function AlertForm(props) {
   const { kindAlert, message } = props;
@@ -23,7 +23,7 @@ function AlertForm(props) {
     return (
       <Alert color="success">
         {message}
-        <Link className="alert-link" to="/">
+        <Link className="alert-link" to="/viewUser">
           Nhấn vào đây để tiếp tục.
         </Link>
       </Alert>
@@ -47,9 +47,8 @@ class Login extends Component {
   }
 
   handleSubmit = e => {
-    const { login } = this.props;
     e.preventDefault();
-
+    const { login } = this.props;
     const email = e.target.exampleEmail.value;
     const password = e.target.examplePassword.value;
 
@@ -59,6 +58,10 @@ class Login extends Component {
       });
       return;
     }
+    this.setState({
+      kindAlert: 'success',
+      message: 'Đăng nhập thành công. '
+    });
 
     login(email, password);
   };
@@ -76,10 +79,12 @@ class Login extends Component {
   }
 
   render() {
-    const user = localStorage.getItem('userTokenAdmin');
+    const user = localStorage.getItem('userAdminToken');
     return (
       <>
-        {!user ? (
+        {user ? (
+          <Redirect to="/viewUser" />
+        ) : (
           <div className="container col-sm-3 mt-5 login-form">
             <div>
               {this.renderAlert()}
@@ -125,8 +130,6 @@ class Login extends Component {
               </a>
             </div>
           </div>
-        ) : (
-          <div className="container login-form">{this.renderAlert()}</div>
         )}
       </>
     );
