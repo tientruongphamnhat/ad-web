@@ -1,4 +1,7 @@
 import fetch from 'cross-fetch';
+import { createBrowserHistory } from 'history';
+
+const history = createBrowserHistory();
 
 export const receiveUser = user => ({
   type: 'RECEIVE_USER',
@@ -33,6 +36,8 @@ export const getUser = response => {
         if (res) {
           localStorage.setItem('userAdmin', JSON.stringify(response.data));
           dispatch(receiveUser(response.data));
+          history.push('/viewUser');
+          window.location.reload();
         } else {
           dispatch(loginFailed(response.message));
         }

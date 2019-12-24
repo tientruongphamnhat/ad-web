@@ -10,7 +10,9 @@ class ListContract extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      listContract: []
+      listContract: [],
+      listTutor: [],
+      listStudent: []
     };
   }
 
@@ -31,9 +33,76 @@ class ListContract extends React.Component {
       })
       .then(response => {
         if (res) {
-          this.setState({
-            listContract: response.data
+          const listContractTemp = [];
+          const listStudentTemp = [];
+          const listTutorTemp = [];
+
+          response.data.forEach(contract => {
+            let resStudent = true;
+            let resTutor = true;
+
+            fetch(
+              'https://stormy-ridge-33799.herokuapp.com/users/' +
+                String(contract.attributes.student_id),
+              {
+                method: 'get',
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json'
+                }
+              }
+            )
+              .then(response => {
+                if (response.status !== 200) {
+                  resStudent = false;
+                }
+                return response.json();
+              })
+              .then(response => {
+                if (resStudent) {
+                  listStudentTemp.push(response.data);
+                  this.setState({
+                    listContract: listContractTemp,
+                    listStudent: listStudentTemp,
+                    listTutor: listTutorTemp
+                  });
+                }
+              });
+
+            fetch(
+              'https://stormy-ridge-33799.herokuapp.com/users/' +
+                String(contract.attributes.tutor_id),
+              {
+                method: 'get',
+                headers: {
+                  Accept: 'application/json',
+                  'Content-Type': 'application/json'
+                }
+              }
+            )
+              .then(response => {
+                if (response.status !== 200) {
+                  resTutor = false;
+                }
+                return response.json();
+              })
+              .then(response => {
+                if (resTutor) {
+                  listTutorTemp.push(response.data);
+                }
+
+                this.setState({
+                  listContract: listContractTemp,
+                  listStudent: listStudentTemp,
+                  listTutor: listTutorTemp
+                });
+              });
+
+            listContractTemp.push(contract);
           });
+          // this.setState({
+          //   listContract: response.data
+          // });
         }
         res = true;
       });
@@ -46,8 +115,10 @@ class ListContract extends React.Component {
   }
 
   render() {
-    const { listContract } = this.state;
+    const { listContract, listTutor, listStudent } = this.state;
     const mapListContract = listContract.map(contract => {
+      console.log('tutor length' + listTutor.length);
+      console.log('student length' + listStudent.length);
       return (
         <tr>
           <td>
@@ -55,38 +126,65 @@ class ListContract extends React.Component {
               {contract.id ? contract.id : 'Chưa có'}
             </Badge>
           </td>
-          <th scope="row">
-            <Media className="align-items-center">
-              <a
-                className="avatar rounded-circle mr-3"
-                // onClick={e => e.preventDefault()}
-              >
-                <img
-                  alt="avatar"
-                  src="https://scontent-hkg3-2.xx.fbcdn.net/v/t1.0-1/c0.0.160.160a/p160x160/77054448_2395267320735838_6975058001447092224_o.jpg?_nc_cat=111&_nc_ohc=ymh_DbtN4OoAQmQK7N6pWofiE0KgtgJ3iOOEZ5hBZajEgbBC7vDvB4IOA&_nc_ht=scontent-hkg3-2.xx&oh=58c179d6691c367bf118decdea6e5a29&oe=5EAF7B12"
-                />
-              </a>
-              <Media>
-                <span className="mb-0 text-sm">Trương Phạm Nhật Tiến</span>
-              </Media>
-            </Media>
-          </th>
-          <th scope="row">
-            <Media className="align-items-center">
-              <a
-                className="avatar rounded-circle mr-3"
-                // onClick={e => e.preventDefault()}
-              >
-                <img
-                  alt="avatar"
-                  src="https://scontent.fsgn5-7.fna.fbcdn.net/v/t1.0-1/p100x100/53023841_1076299825887962_7777782565821218816_o.jpg?_nc_cat=103&_nc_ohc=F7pBb5IC7dgAQk--bJezVDWDGFCt0g8rd_ht83v5YsRi1lpamlh14InZQ&_nc_ht=scontent.fsgn5-7.fna&oh=8a1889caad1be79e4a9c21399fceeb19&oe=5E6F6465"
-                />
-              </a>
-              <Media>
-                <span className="mb-0 text-sm">Lê Thanh Thành Toại</span>
-              </Media>
-            </Media>
-          </th>
+          {listStudent.length > 0 &&
+          listTutor.length > 0 &&
+          listStudent.length === listContract.length &&
+          listTutor.length === listContract.length ? (
+            <>
+              <th scope="row">
+                <Media className="align-items-center">
+                  <a className="avatar rounded-circle mr-3">
+                    <img
+                      alt="avatar"
+                      src={
+                        listStudent[listContract.indexOf(contract)].attributes
+                          .image
+                          ? 'https://stormy-ridge-33799.herokuapp.com' +
+                            listStudent[listContract.indexOf(contract)]
+                              .attributes.image
+                          : 'http://ssl.gstatic.com/accounts/ui/avatar_2x.png'
+                      }
+                    />
+                  </a>
+                  <Media>
+                    <span className="mb-0 text-sm">
+                      {listStudent[listContract.indexOf(contract)].attributes
+                        .name
+                        ? listStudent[listContract.indexOf(contract)].attributes
+                            .name
+                        : 'Chưa cập nhập tên'}
+                    </span>
+                  </Media>
+                </Media>
+              </th>
+              <th scope="row">
+                <Media className="align-items-center">
+                  <a className="avatar rounded-circle mr-3">
+                    <img
+                      alt="avatar"
+                      src={
+                        listTutor[listContract.indexOf(contract)].attributes
+                          .image
+                          ? 'https://stormy-ridge-33799.herokuapp.com' +
+                            listTutor[listContract.indexOf(contract)].attributes
+                              .image
+                          : 'http://ssl.gstatic.com/accounts/ui/avatar_2x.png'
+                      }
+                    />
+                  </a>
+                  <Media>
+                    <span className="mb-0 text-sm">
+                      {listTutor[listContract.indexOf(contract)].attributes.name
+                        ? listTutor[listContract.indexOf(contract)].attributes
+                            .name
+                        : 'Chưa cập nhập tên'}
+                    </span>
+                  </Media>
+                </Media>
+              </th>
+            </>
+          ) : null}
+
           <td>
             {contract.attributes.price ? contract.attributes.price : 'Chưa có'}
           </td>
@@ -135,6 +233,14 @@ class ListContract extends React.Component {
             <td>
               <Badge pill color="success">
                 Đã từ chối
+              </Badge>
+            </td>
+          ) : null}
+
+          {contract.attributes.status === 'Đã hoàn tiền' ? (
+            <td>
+              <Badge pill color="success">
+                Đã hoàn tiền
               </Badge>
             </td>
           ) : null}

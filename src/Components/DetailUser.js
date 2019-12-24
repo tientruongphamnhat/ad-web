@@ -31,9 +31,13 @@ class user extends Component {
           city: '',
           price: '',
           skills: []
-        },
-        listSkill: []
-      }
+        }
+      },
+      listSkill: [],
+      listRequestToMe: [],
+      listStudents: [],
+      listRequestToOthers: [],
+      listTutor: []
     };
   }
 
@@ -43,6 +47,7 @@ class user extends Component {
 
     let res = true;
 
+    //Lấy thông tin user
     fetch('https://stormy-ridge-33799.herokuapp.com/users/' + userID, {
       method: 'get',
       headers: {
@@ -65,6 +70,7 @@ class user extends Component {
         res = true;
       });
 
+    //Lấy list kỹ năng
     fetch('https://stormy-ridge-33799.herokuapp.com/skills', {
       method: 'get',
       headers: {
@@ -86,13 +92,381 @@ class user extends Component {
         }
         res = true;
       });
+
+    //Lấy danh sách dạy
+    fetch(`https://stormy-ridge-33799.herokuapp.com/contracts`, {
+      method: 'get',
+      headers: {
+        Accept: 'application/json',
+        'Content-Type': 'application/json'
+      }
+    })
+      .then(response => {
+        if (response.status !== 200) {
+          res = false;
+        }
+        return response.json();
+      })
+      .then(response => {
+        if (res) {
+          const listRTMeTemp = [];
+          const listRTOthersTemp = [];
+          const listStudentTemp = [];
+          const listTutorTemp = [];
+
+          response.data.forEach(contract => {
+            if (String(contract.attributes.tutor_id) === userID) {
+              console.log('contract others hire me' + contract);
+              let resStudent = true;
+              fetch(
+                'https://stormy-ridge-33799.herokuapp.com/users/' +
+                  String(contract.attributes.student_id),
+                {
+                  method: 'get',
+                  headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                  }
+                }
+              )
+                .then(response => {
+                  if (response.status !== 200) {
+                    resStudent = false;
+                  }
+                  return response.json();
+                })
+                .then(response => {
+                  if (resStudent) {
+                    console.log('học sinh' + response.data);
+                    listStudentTemp.push(response.data);
+                    console.log('học sinh length' + listStudentTemp.length);
+                    this.setState({
+                      listStudents: listStudentTemp
+                    });
+                  }
+                });
+              listRTMeTemp.push(contract);
+              console.log('hire length' + listRTMeTemp.length);
+              this.setState({
+                listRequestToMe: listRTMeTemp
+              });
+            }
+            if (String(contract.attributes.student_id) === userID) {
+              console.log('contract hire others' + contract);
+              let resTutor = true;
+
+              fetch(
+                'https://stormy-ridge-33799.herokuapp.com/users/' +
+                  String(contract.attributes.tutor_id),
+                {
+                  method: 'get',
+                  headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                  }
+                }
+              )
+                .then(response => {
+                  if (response.status !== 200) {
+                    resTutor = false;
+                  }
+                  return response.json();
+                })
+                .then(response => {
+                  if (resTutor) {
+                    console.log(response.data);
+                    listTutorTemp.push(response.data);
+                  }
+                  this.setState({
+                    listTutor: listTutorTemp
+                  });
+                });
+              listRTOthersTemp.push(contract);
+              this.setState({
+                listRequestToOthers: listRTOthersTemp
+              });
+            }
+          });
+
+          // this.setState({
+          //   listRequestToMe: listRTMeTemp,
+          //   listRequestToOthers: listRTOthersTemp,
+          //   listStudents: listStudentTemp,
+          //   listTutor: listTutorTemp
+          // });
+        }
+        res = true;
+        return true;
+      });
   }
 
   render() {
-    const { user } = this.state;
+    const {
+      user,
+      listRequestToMe,
+      listRequestToOthers,
+      listStudents,
+      listTutor
+    } = this.state;
     const mapListSkill = user.attributes.skills.map(skill => {
       return <li>{skill.name}</li>;
     });
+
+    const mapListRequestToMe = listRequestToMe.map(request => {
+      return (
+        <tr>
+          <td>
+            <Badge pill color="success">
+              {request.id ? request.id : 'Chưa có'}
+            </Badge>
+          </td>
+          {listStudents.length > 0 &&
+          listStudents.length === listRequestToMe.length ? (
+            <th scope="row">
+              <Media className="align-items-center">
+                <a
+                  className="avatar rounded-circle mr-3"
+                  // onClick={e => e.preventDefault()}
+                >
+                  <img
+                    alt="avatar"
+                    src={
+                      listStudents[listRequestToMe.indexOf(request)].attributes
+                        .image
+                        ? 'https://stormy-ridge-33799.herokuapp.com' +
+                          listStudents[listRequestToMe.indexOf(request)]
+                            .attributes.image
+                        : 'http://ssl.gstatic.com/accounts/ui/avatar_2x.png'
+                    }
+                  />
+                </a>
+                <Media>
+                  <span className="mb-0 text-sm">
+                    {listStudents[listRequestToMe.indexOf(request)].attributes
+                      .name
+                      ? listStudents[listRequestToMe.indexOf(request)]
+                          .attributes.name
+                      : 'Chưa cập nhập tên'}
+                  </span>
+                </Media>
+              </Media>
+            </th>
+          ) : null}
+
+          <td>
+            {request.attributes.price ? request.attributes.price : 'Chưa có'}
+          </td>
+
+          {request.attributes.status === 'Đang chờ' ? (
+            <td>
+              <Badge pill color="warning">
+                Đang chờ
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Đang học' ? (
+            <td>
+              <Badge pill color="primary">
+                Đang học
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Đang khiếu nại' ? (
+            <td>
+              <Badge pill color="danger">
+                Đang khiếu nại
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Hoàn thành' ? (
+            <td>
+              <Badge pill color="success">
+                Hoàn thành
+              </Badge>
+            </td>
+          ) : null}
+          {request.attributes.status === 'Đã hủy' ? (
+            <td>
+              <Badge pill color="danger">
+                Đã hủy
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Đã từ chối' ? (
+            <td>
+              <Badge pill color="success">
+                Đã từ chối
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Đã hoàn tiền' ? (
+            <td>
+              <Badge pill color="success">
+                Đã hoàn tiền
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.paid ? (
+            <td>
+              <Badge pill color="success">
+                Đã thanh toán
+              </Badge>
+            </td>
+          ) : (
+            <td>
+              <Badge pill color="danger">
+                Chưa thanh toán
+              </Badge>
+            </td>
+          )}
+
+          <td className="text-right">
+            <Button
+              id={request.id}
+              color="info"
+              className="detail-button"
+              onClick={e => this.handleClickDetailRequest(e)}
+            >
+              Chi tiết
+            </Button>
+          </td>
+        </tr>
+      );
+    });
+
+    const mapListRequestToOthers = listRequestToOthers.map(request => {
+      return (
+        <tr>
+          <td>
+            <Badge pill color="success">
+              {request.id ? request.id : 'Chưa có'}
+            </Badge>
+          </td>
+          {listTutor.length > 0 &&
+          listTutor.length === listRequestToOthers.length ? (
+            <th scope="row">
+              <Media className="align-items-center">
+                <a
+                  className="avatar rounded-circle mr-3"
+                  // onClick={e => e.preventDefault()}
+                >
+                  <img
+                    alt="avatar"
+                    src={
+                      listTutor[listRequestToOthers.indexOf(request)].attributes
+                        .image
+                        ? 'https://stormy-ridge-33799.herokuapp.com' +
+                          listTutor[listRequestToOthers.indexOf(request)]
+                            .attributes.image
+                        : 'http://ssl.gstatic.com/accounts/ui/avatar_2x.png'
+                    }
+                  />
+                </a>
+                <Media>
+                  <span className="mb-0 text-sm">
+                    {listTutor[listRequestToOthers.indexOf(request)].attributes
+                      .name
+                      ? listTutor[listRequestToOthers.indexOf(request)]
+                          .attributes.name
+                      : 'Chưa cập nhập tên'}
+                  </span>
+                </Media>
+              </Media>
+            </th>
+          ) : null}
+          <td>
+            {request.attributes.price ? request.attributes.price : 'Chưa có'}
+          </td>
+
+          {request.attributes.status === 'Đang chờ' ? (
+            <td>
+              <Badge pill color="warning">
+                Đang chờ
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Đang học' ? (
+            <td>
+              <Badge pill color="primary">
+                Đang học
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Đang khiếu nại' ? (
+            <td>
+              <Badge pill color="danger">
+                Đang khiếu nại
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Hoàn thành' ? (
+            <td>
+              <Badge pill color="success">
+                Hoàn thành
+              </Badge>
+            </td>
+          ) : null}
+          {request.attributes.status === 'Đã hủy' ? (
+            <td>
+              <Badge pill color="danger">
+                Đã hủy
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Đã từ chối' ? (
+            <td>
+              <Badge pill color="success">
+                Đã từ chối
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.status === 'Đã hoàn tiền' ? (
+            <td>
+              <Badge pill color="success">
+                Đã hoàn tiền
+              </Badge>
+            </td>
+          ) : null}
+
+          {request.attributes.paid ? (
+            <td>
+              <Badge pill color="success">
+                Đã thanh toán
+              </Badge>
+            </td>
+          ) : (
+            <td>
+              <Badge pill color="danger">
+                Chưa thanh toán
+              </Badge>
+            </td>
+          )}
+
+          <td className="text-right">
+            <Button
+              id={request.id}
+              color="info"
+              className="detail-button"
+              onClick={e => this.handleClickDetailRequest(e)}
+            >
+              Chi tiết
+            </Button>
+          </td>
+        </tr>
+      );
+    });
+
     return (
       <>
         <div class="container col-12 col-lg-8">
@@ -190,101 +564,16 @@ class user extends Component {
               <Card className="mt-4">
                 <Table className="align-items-center table-flush" responsive>
                   <thead className="thead-light">
-                    <tr>
+                    <tr className="text-center">
+                      <th scope="col">Mã HD</th>
                       <th scope="col">Học sinh</th>
                       <th scope="col">Phí</th>
-                      <th scope="col">Xác nhận</th>
                       <th scope="col">Trạng thái</th>
                       <th scope="col">Thanh toán</th>
                       <th scope="col" />
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="avatar"
-                              src="https://scontent-hkg3-2.xx.fbcdn.net/v/t1.0-1/c0.0.160.160a/p160x160/77054448_2395267320735838_6975058001447092224_o.jpg?_nc_cat=111&_nc_ohc=ymh_DbtN4OoAQmQK7N6pWofiE0KgtgJ3iOOEZ5hBZajEgbBC7vDvB4IOA&_nc_ht=scontent-hkg3-2.xx&oh=58c179d6691c367bf118decdea6e5a29&oe=5EAF7B12"
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Trương Phạm Nhât Tiến
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>160000d</td>
-                      <td>
-                        <Badge pill color="success">
-                          Đã xác nhận
-                        </Badge>
-                      </td>
-                      <td>
-                        <Badge pill color="primary">
-                          Đang học
-                        </Badge>
-                      </td>
-                      <td>
-                        <Badge pill color="danger">
-                          Chưa thanh toán
-                        </Badge>
-                      </td>
-                      <td className="text-right">
-                        <Button color="info" className="detail-button">
-                          Chi tiết
-                        </Button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="avatar"
-                              src="https://scontent-hkg3-2.xx.fbcdn.net/v/t1.0-1/c0.0.160.160a/p160x160/77054448_2395267320735838_6975058001447092224_o.jpg?_nc_cat=111&_nc_ohc=ymh_DbtN4OoAQmQK7N6pWofiE0KgtgJ3iOOEZ5hBZajEgbBC7vDvB4IOA&_nc_ht=scontent-hkg3-2.xx&oh=58c179d6691c367bf118decdea6e5a29&oe=5EAF7B12"
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Trương Phạm Nhật Tiến
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>120000d</td>
-                      <td>
-                        <Badge pill color="warning">
-                          Đang chờ
-                        </Badge>
-                      </td>
-                      <td>
-                        <Badge pill color="danger">
-                          Đang khiếu nại
-                        </Badge>
-                      </td>
-                      <td>
-                        <Badge pill color="danger">
-                          Chưa thanh toán
-                        </Badge>
-                      </td>
-                      <td className="text-right">
-                        <Button color="info" className="detail-button">
-                          Chi tiết
-                        </Button>
-                      </td>
-                    </tr>
-                  </tbody>
+                  <tbody className="text-center">{mapListRequestToMe}</tbody>
                 </Table>
               </Card>
             </div>
@@ -297,100 +586,15 @@ class user extends Component {
                 <Table className="align-items-center table-flush" responsive>
                   <thead className="thead-light">
                     <tr>
-                      <th scope="col">Học sinh</th>
+                      <th scope="col">Mã HD</th>
+                      <th scope="col">Người dạy</th>
                       <th scope="col">Phí</th>
-                      <th scope="col">Xác nhận</th>
                       <th scope="col">Trạng thái</th>
                       <th scope="col">Thanh toán</th>
                       <th scope="col" />
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="avatar"
-                              src="https://scontent-hkg3-2.xx.fbcdn.net/v/t1.0-1/c0.0.160.160a/p160x160/77054448_2395267320735838_6975058001447092224_o.jpg?_nc_cat=111&_nc_ohc=ymh_DbtN4OoAQmQK7N6pWofiE0KgtgJ3iOOEZ5hBZajEgbBC7vDvB4IOA&_nc_ht=scontent-hkg3-2.xx&oh=58c179d6691c367bf118decdea6e5a29&oe=5EAF7B12"
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Trương Phạm Nhât Tiến
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>160000d</td>
-                      <td>
-                        <Badge pill color="success">
-                          Đã xác nhận
-                        </Badge>
-                      </td>
-                      <td>
-                        <Badge pill color="primary">
-                          Đang học
-                        </Badge>
-                      </td>
-                      <td>
-                        <Badge pill color="danger">
-                          Chưa thanh toán
-                        </Badge>
-                      </td>
-                      <td className="text-right">
-                        <Button color="info" className="detail-button">
-                          Chi tiết
-                        </Button>
-                      </td>
-                    </tr>
-                    <tr>
-                      <th scope="row">
-                        <Media className="align-items-center">
-                          <a
-                            className="avatar rounded-circle mr-3"
-                            href="#pablo"
-                            onClick={e => e.preventDefault()}
-                          >
-                            <img
-                              alt="avatar"
-                              src="https://scontent-hkg3-2.xx.fbcdn.net/v/t1.0-1/c0.0.160.160a/p160x160/77054448_2395267320735838_6975058001447092224_o.jpg?_nc_cat=111&_nc_ohc=ymh_DbtN4OoAQmQK7N6pWofiE0KgtgJ3iOOEZ5hBZajEgbBC7vDvB4IOA&_nc_ht=scontent-hkg3-2.xx&oh=58c179d6691c367bf118decdea6e5a29&oe=5EAF7B12"
-                            />
-                          </a>
-                          <Media>
-                            <span className="mb-0 text-sm">
-                              Trương Phạm Nhật Tiến
-                            </span>
-                          </Media>
-                        </Media>
-                      </th>
-                      <td>120000d</td>
-                      <td>
-                        <Badge pill color="warning">
-                          Đang chờ
-                        </Badge>
-                      </td>
-                      <td>
-                        <Badge pill color="danger">
-                          Đang khiếu nại
-                        </Badge>
-                      </td>
-                      <td>
-                        <Badge pill color="danger">
-                          Chưa thanh toán
-                        </Badge>
-                      </td>
-                      <td className="text-right">
-                        <Button color="info" className="detail-button">
-                          Chi tiết
-                        </Button>
-                      </td>
-                    </tr>
-                  </tbody>
+                  <tbody>{mapListRequestToOthers}</tbody>
                 </Table>
               </Card>
             </div>

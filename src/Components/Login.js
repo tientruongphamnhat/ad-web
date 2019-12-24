@@ -58,10 +58,6 @@ class Login extends Component {
       });
       return;
     }
-    this.setState({
-      kindAlert: 'success',
-      message: 'Đăng nhập thành công. '
-    });
 
     login(email, password);
   };
@@ -79,7 +75,7 @@ class Login extends Component {
   }
 
   render() {
-    const user = localStorage.getItem('userAdminToken');
+    const user = localStorage.getItem('userAdmin');
     return (
       <>
         {user ? (
