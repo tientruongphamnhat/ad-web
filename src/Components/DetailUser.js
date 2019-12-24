@@ -3,17 +3,9 @@ import React, { Component } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../Style.css';
 import { Button, Media, Badge, Card, Table } from 'reactstrap';
-// import {
-//   Modal,
-//   ModalHeader,
-//   ModalBody,
-//   ModalFooter,
-//   Button,
-//   Form,
-//   FormGroup,
-//   Label,
-//   Input
-// } from 'reactstrap';
+import { createBrowserHistory } from 'history';
+
+const history = createBrowserHistory();
 
 class user extends Component {
   constructor(props) {
@@ -198,6 +190,12 @@ class user extends Component {
         res = true;
         return true;
       });
+  }
+
+  handleClickDetailRequest(e) {
+    const idContract = e.target.id;
+    history.push('/detailContract/id:' + idContract);
+    window.location.reload();
   }
 
   render() {
