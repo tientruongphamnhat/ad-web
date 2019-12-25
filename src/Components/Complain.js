@@ -144,7 +144,12 @@ class ListComplain extends React.Component {
                   />
                 </a>
                 <Media>
-                  <span className="mb-0 text-sm">Trương Phạm Nhật Tiến</span>
+                  <span className="mb-0 text-sm">
+                    {listStudent[listContract.indexOf(request)].attributes.name
+                      ? listStudent[listContract.indexOf(request)].attributes
+                          .name
+                      : 'Chưa cập nhập tên'}
+                  </span>
                 </Media>
               </Media>
             </th>
