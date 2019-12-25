@@ -29,7 +29,8 @@ class user extends Component {
       listRequestToMe: [],
       listStudents: [],
       listRequestToOthers: [],
-      listTutor: []
+      listTutor: [],
+      isLock: true
     };
   }
 
@@ -204,10 +205,17 @@ class user extends Component {
       listRequestToMe,
       listRequestToOthers,
       listStudents,
-      listTutor
+      listTutor,
+      isLock,
+      listSkill
     } = this.state;
-    const mapListSkill = user.attributes.skills.map(skill => {
-      return <li>{skill.name}</li>;
+
+    const mapListSkill = user.attributes.skills.map(skillOfTutor => {
+      for (var i = 0; i < listSkill.length; i++) {
+        if (skillOfTutor === listSkill[i].id) {
+          return <li>{listSkill[i].attributes.name}</li>;
+        }
+      }
     });
 
     const mapListRequestToMe = listRequestToMe.map(request => {
@@ -478,7 +486,12 @@ class user extends Component {
               <div className="instructor-short-info flex flex-wrap">
                 <div className="instructors-stats">
                   <img
-                    src="https://scontent.fsgn5-3.fna.fbcdn.net/v/t1.0-1/c0.0.160.160a/p160x160/77054448_2395267320735838_6975058001447092224_o.jpg?_nc_cat=111&_nc_ohc=BxVlFSkgWDAAQlgPodsDXQ2rCpKHjvwFZ5S8m8bEixrJ_MXFie1OpC_-Q&_nc_ht=scontent.fsgn5-3.fna&oh=f21a00b657d0a8f48773aba2c22a117f&oe=5EAF7B12"
+                    src={
+                      user.attributes.image
+                        ? 'https://stormy-ridge-33799.herokuapp.com' +
+                          String(user.attributes.image)
+                        : 'http://ssl.gstatic.com/accounts/ui/avatar_2x.png'
+                    }
                     alt=""
                   />
 
@@ -551,7 +564,7 @@ class user extends Component {
                   borderColor: '#34d986'
                 }}
               >
-                Khóa Tài Khoản
+                {isLock ? 'Khóa tài khoản' : 'Mở khóa'}
               </Button>
             </div>
 
