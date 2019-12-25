@@ -199,6 +199,12 @@ class user extends Component {
     window.location.reload();
   }
 
+  handleLockUser() {
+    this.setState({
+      isLock: !this.state.isLock
+    });
+  }
+
   render() {
     const {
       user,
@@ -563,6 +569,7 @@ class user extends Component {
                   background: '#fff',
                   borderColor: '#34d986'
                 }}
+                onClick={() => this.handleLockUser()}
               >
                 {isLock ? 'Khóa tài khoản' : 'Mở khóa'}
               </Button>
