@@ -10,7 +10,8 @@ class ListComplain extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      listContract: []
+      listContract: [],
+      listStudent: []
     };
   }
 
@@ -38,9 +39,38 @@ class ListComplain extends React.Component {
       .then(response => {
         if (res) {
           const listContractTemp = [];
+          const listStudentTemp = [];
 
           response.data.forEach(contract => {
             if (String(contract.attributes.status) === 'Đang khiếu nại') {
+              let resStudent = true;
+
+              fetch(
+                'https://stormy-ridge-33799.herokuapp.com/users/' +
+                  String(contract.attributes.student_id),
+                {
+                  method: 'get',
+                  headers: {
+                    Accept: 'application/json',
+                    'Content-Type': 'application/json'
+                  }
+                }
+              )
+                .then(response => {
+                  if (response.status !== 200) {
+                    resStudent = false;
+                  }
+                  return response.json();
+                })
+                .then(response => {
+                  if (resStudent) {
+                    listStudentTemp.push(response.data);
+                    this.setState({
+                      listContract: listContractTemp,
+                      listStudent: listStudentTemp
+                    });
+                  }
+                });
               listContractTemp.push(contract);
             }
           });
@@ -84,7 +114,7 @@ class ListComplain extends React.Component {
   }
 
   render() {
-    const { listContract } = this.state;
+    const { listContract, listStudent } = this.state;
     const mapListContract = listContract.map(request => {
       return (
         <tr>
@@ -93,22 +123,33 @@ class ListComplain extends React.Component {
               {request.id ? request.id : 'Chưa có'}
             </Badge>
           </td>
-          <th scope="row">
-            <Media className="align-items-center">
-              <a
-                className="avatar rounded-circle mr-3"
-                // onClick={e => e.preventDefault()}
-              >
-                <img
-                  alt="avatar"
-                  src="https://scontent-hkg3-2.xx.fbcdn.net/v/t1.0-1/c0.0.160.160a/p160x160/77054448_2395267320735838_6975058001447092224_o.jpg?_nc_cat=111&_nc_ohc=ymh_DbtN4OoAQmQK7N6pWofiE0KgtgJ3iOOEZ5hBZajEgbBC7vDvB4IOA&_nc_ht=scontent-hkg3-2.xx&oh=58c179d6691c367bf118decdea6e5a29&oe=5EAF7B12"
-                />
-              </a>
-              <Media>
-                <span className="mb-0 text-sm">Trương Phạm Nhật Tiến</span>
+          {listContract.length === listStudent.length &&
+          listStudent.length > 0 ? (
+            <th scope="row">
+              <Media className="align-items-center">
+                <a
+                  className="avatar rounded-circle mr-3"
+                  // onClick={e => e.preventDefault()}
+                >
+                  <img
+                    alt="avatar"
+                    src={
+                      listStudent[listContract.indexOf(request)].attributes
+                        .image
+                        ? 'https://stormy-ridge-33799.herokuapp.com' +
+                          listStudent[listContract.indexOf(request)].attributes
+                            .image
+                        : 'http://ssl.gstatic.com/accounts/ui/avatar_2x.png'
+                    }
+                  />
+                </a>
+                <Media>
+                  <span className="mb-0 text-sm">Trương Phạm Nhật Tiến</span>
+                </Media>
               </Media>
-            </Media>
-          </th>
+            </th>
+          ) : null}
+
           <td>
             {request.attributes.price ? request.attributes.price : 'Chưa có'}
           </td>
